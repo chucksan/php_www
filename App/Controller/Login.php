@@ -2,9 +2,11 @@
 namespace App\Controller;
 class Login
 {
-    public function __construct()
+    private $db;
+    public function __construct($db)
     {
         // 초기화
+        $this->db = $db;
     }
 
     // 1. 언어 정해서 동작방식 (C언어, 자바)
@@ -27,15 +29,39 @@ class Login
         } else {
             // 로그인 체크 및 저장
             if($_POST) {
-                if($_POST['email'] == $email && $_POST['password'] == $password) {
-                    echo "로그인 성공";
-                    // 새션 슈퍼변수. 값 저장
-                    $_SESSION["email"] = $_POST['email'];
-                    echo "세션 저장 성공";
-                    // 페이지 이동
-                    header("location:"."/databases/");
+                if($_POST['email'] && $_POST['password']) {
+                    
+                    $query = "SELECT * from mem where email='".$_POST['email']."';";
+                    echo $query;
+                    $result = $this->db->queryExecute($query);
+
+                    if($row = mysqli_fetch_object($result)) {
+                        // 데이터베이스 조회 성공   
+                        if($_POST['password'] == $row->password)  {
+                            // 로그인 성공
+                            echo "로그인 성공";
+                            // 새션 슈퍼변수. 값 저장
+                            $_SESSION["email"] = $_POST['email'];
+                            echo "세션 저장 성공";
+                            // 페이지 이동
+                            header("location:"."/databases/");
+
+                        } else {
+                            // 비밀번호가 맞지 않습니다.
+                            echo "비밀번호가 맞지 않습니다.";
+                            exit;
+                        }
+                    } else {
+                        // 조회 실패
+                        echo $_POST['email']."는 등록된 회원이 아닙니다.";
+                        exit;
+                    }
+
+                    
                 } else {
                     echo "로그인 실패";
+                    echo "이메일과 비밀번호를 입력해 주세요.";
+                    exit;
 
                     // 페이지 이동
                     header("location:"."/");
