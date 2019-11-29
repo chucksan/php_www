@@ -31,8 +31,13 @@ class Login extends Controller
             if($_POST) {
                 if($_POST['email'] && $_POST['password']) {
                     
+                    // aaa@gmail.com
+                    if(filter_var($_POST['email'], FILTER_VALIDATE_EMAIL) === false) {
+                        echo "잘못된 이메일 주소 입니다.";
+                        exit;
+                    }
+                    
                     $query = "SELECT * from mem where email='".$_POST['email']."';";
-                    echo $query;
                     $result = $this->db->queryExecute($query);
 
                     if($row = mysqli_fetch_object($result)) {
